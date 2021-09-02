@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bistro Babushka</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Nunito:wght@300&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1>Bistro Babushka</h1>
+    <h3>Alle</h3>
+    <nav>
+      <button data-kategori="alle" class="valgt">Alle</button>
+      <button data-kategori="forretter">Forretter</button>
+      <button data-kategori="hovedretter">Hovedretter</button>
+      <button data-kategori="desserter">Desserter</button>
+      <button data-kategori="drikkevarer">Drikkevarer</button>
+      <button data-kategori="sideorders">Sideorders</button>
+    </nav>
+
+    <section class="data-container"></section>
+
+    <template>
+      <article id="liste">
+        <img src="" alt="" />
+        <h2></h2>
+        <p class="kategori"></p>
+        <p class="kortbeskrivelse"></p>
+        <p class="oprindelsesregion"></p>
+        <p class="pris"></p>
+      </article>
+    </template>
+
+    <section id="popup">
+      <button>x</button>
+      <article id="liste">
+        <img src="" alt="" />
+        <h2></h2>
+        <p class="kategori"></p>
+        <p class="langbeskrivelse"></p>
+        <p class="oprindelsesregion"></p>
+        <p class="pris"></p>
+      </article>
+    </section>
+
+    <style>
+      h1 {
+        text-align: center;
+        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+        color: rgb(155, 24, 24);
+        font-size: 3rem;
+
+        font-family: "Nunito", sans-serif;
+      }
+
+      h2 {
+        font-family: "Nunito", sans-serif;
+      }
+
+      #popup {
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.884);
+        position: fixed;
+        top: 0;
+        left: 0;
+        overflow: auto;
+        display: none;
+      }
+
+      #popup article {
+        margin: 0 auto;
+        background-color: rgba(221, 96, 96, 0.912);
+        width: 50%;
+        height: 80%;
+        padding: 20px;
+        position: relative;
+        top: 2vw;
+        border-radius: 5%;
+      }
+
+      @media (max-width: 1000px) {
+        #popup article {
+          height: 80%;
+        }
+      }
+
+      #popup button {
+        color: black;
+        position: fixed;
+        top: 4vw;
+        left: 25vw;
+        z-index: 1;
+      }
+
+      nav button {
+        font-family: "Nunito", sans-serif;
+        font-weight: bold;
+      }
+
+      .kategori {
+        font-style: italic;
+      }
+
+      p {
+        font-family: "Nunito", sans-serif;
+      }
+
+      h3 {
+        text-align: center;
+        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+        color: rgb(155, 24, 24);
+        font-family: "Nunito", sans-serif;
+      }
+
+      nav {
+        display: flex;
+        margin: 30px;
+      }
+
+      .valgt {
+        color: white;
+        background-color: rgb(155, 24, 24);
+      }
+
+      button {
+        margin: 0 auto;
+        font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
+        color: rgb(155, 24, 24);
+      }
+
+      body {
+        margin: 0 auto;
+        max-width: 1100px;
+        background-color: rgba(90, 135, 67, 0.837);
+        padding-bottom: 100px;
+      }
+      section {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 10px;
+      }
+      article {
+        background-color: rgba(244, 255, 239, 0.19);
+        border: 2px black;
+        border-style: solid;
+        padding: 5px;
+        text-align: center;
+      }
+
+      img {
+        max-width: 60%;
+      }
+    </style>
+
+    <script>
+      const url = "https://babushka-dd8a.restdb.io/rest/menu";
+
+      const options = {
+        headers: {
+          "x-apikey": "600ec2fb1346a1524ff12de4",
+        },
+      };
+
+      document.addEventListener("DOMContentLoaded", start);
+
+      const header = document.querySelector("h3");
+
+      let bistro;
+
+      let filter = "alle";
+
+      function start() {
+        const filterKnapper = document.querySelectorAll("nav button");
+        filterKnapper.forEach((knap) =>
+          knap.addEventListener("click", filtrerBistroen)
+        );
+      }
+
+      function filtrerBistroen() {
+        filter = this.dataset.kategori;
+        document.querySelector(".valgt").classList.remove("valgt");
+        this.classList.add("valgt");
+        vis();
+        header.textContent = this.textContent;
+      }
+
+      async function hentData() {
+        const respons = await fetch(url, options);
+        bistro = await respons.json();
+        vis();
+        console.log(bistro);
+      }
+
+      function vis() {
+        const container = document.querySelector(".data-container");
+        const bistroTemplate = document.querySelector("template");
+        const medieurl = "medium/";
+        const md = "-md.jpg";
+        container.textContent = "";
+
+        bistro.forEach((bistroen) => {
+          if (filter == bistroen.kategori || filter == "alle") {
+            let klon = bistroTemplate.cloneNode(true).content;
+            klon.querySelector("h2").textContent = bistroen.navn;
+            klon.querySelector("img").src = medieurl + bistroen.billednavn + md;
+            klon.querySelector(".kategori").textContent = bistroen.kategori;
+            klon.querySelector(".pris").textContent = bistroen.pris + " kr,-";
+            klon.querySelector(".kortbeskrivelse").textContent =
+              bistroen.kortbeskrivelse;
+            klon.querySelector(".oprindelsesregion").textContent =
+              "oprindelsesregion: " + bistroen.oprindelsesregion;
+            klon
+              .querySelector("article")
+              .addEventListener("click", () => visDetaljer(bistroen));
+            container.appendChild(klon);
+          }
+        });
+      }
+
+      document
+        .querySelector("#popup button")
+        .addEventListener("click", lukPopup);
+
+      function lukPopup() {
+        document.querySelector("#popup").style.display = "none";
+      }
+
+      function visDetaljer(detaljer) {
+        const medieurl = "medium/";
+        const md = "-md.jpg";
+        const popup = document.querySelector("#popup");
+        popup.style.display = "block";
+        popup.querySelector("h2").textContent = detaljer.navn;
+        popup.querySelector("img").src = medieurl + detaljer.billednavn + md;
+        popup.querySelector(".langbeskrivelse").textContent =
+          detaljer.langbeskrivelse;
+        popup.querySelector(".kategori").textContent = detaljer.kategori;
+        popup.querySelector(".pris").textContent = detaljer.pris + " kr,-";
+        popup.querySelector(".oprindelsesregion").textContent =
+          "oprindelsesregion: " + detaljer.oprindelsesregion;
+
+        console.log(detaljer);
+      }
+
+      hentData();
+    </script>
+  </body>
+</html>
